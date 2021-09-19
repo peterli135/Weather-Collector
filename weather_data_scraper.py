@@ -1,21 +1,3 @@
-"""
-Project: Get Weather Data from Zipcode (Weather.com)
-
-What the program will do:
-1. Get the search keyword, in this case, it will be the zipcode, from the input zipcode.
-2. Retrieve the search result page for the zipcode that was given.
-3. Print what the weather is / can also open a new tab to take you to Weather.com for that zipcode.
-
-What the code will look like:
-1. Read the zipcode that was given from the input.
-2. Fetch the search result page with the requests module.
-3. Find the link to each search result.
-4. Call webbrowser.open() to open the link.
-"""
-
-#! python 3
-# find_weather.py - Find the weather through the zipcode.
-
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -49,6 +31,7 @@ soup_tenday = BeautifulSoup(tenday_weather_html.text, 'html.parser')
 
 weather_info = soup_tenday.find_all(class_='DaypartDetails--DetailSummaryContent--3uxcj Disclosure--SummaryDefault--3xAWB')
 
+#creates empty lists and uses for loop to go through each date for the weather
 days = []
 weather_list = []
 for items in weather_info:
@@ -66,43 +49,3 @@ print("You requested weather data for the location:", location)
 
 df = pd.DataFrame(weather_list, index = days)
 print(df)
-
-"""
-#get the location of the zipcode
-location = soup_tenday.find('span', attrs={'class': 'LocationPageTitle--PresentationName--1QYny'}).text
-
-#get current temperature
-current_temp = soup_current.find('span', attrs={'class': 'CurrentConditions--tempValue--3a50n'}).text
-
-#get current conditions
-current_conditions = soup_current.find('div', attrs={'class': 'CurrentConditions--phraseValue--2Z18W'}).text
-
-#get the high temperature
-high_temp = soup_tenday.find('span', attrs={'class': 'DetailsSummary--highTempValue--3Oteu'}).text
-
-#get the low temp value
-low_temp = soup_tenday.find('span', attrs={'class': 'DetailsSummary--lowTempValue--3H-7I'}).text
-
-#get the precipitation content
-precip = soup_tenday.find('span', attrs={'data-testid': 'PercentageValue'}).text
-
-#get the wind content
-wind = soup_tenday.find('span', attrs={'class': 'Wind--windWrapper--3aqXJ undefined'}).text
-
-#get the time from when the data was requested
-time = soup_tenday.find('div', attrs={'class': 'DailyForecast--timestamp--22ExT'}).text
-
-print("You requested weather data for the location:", location)
-print("The time is currently:", time)
-print("The current temperature is:", current_temp, "& Current conditions:", current_conditions)
-print("The tempature high for today will be:", high_temp, "& The temperature low for today will be: ", low_temp)
-print("The precipitation for today is:", precip)
-print("The wind today is:", wind)
-
-temps = []
-for items in soup_tenday.find_all(class_='DaypartDetails--DetailSummaryContent--3uxcj Disclosure--SummaryDefault--3xAWB'):
-    day = items.find('h2').text
-    temp = items.find(class_="DetailsSummary--temperature--1Syw3").text
-    temps.append(temp)
-    print(day, ":", temp)
-"""
