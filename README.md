@@ -1,4 +1,4 @@
-# Weather-Data-Scraper
+# Weather Data Scraper
 
 ## What this Program does
 - Input a location you want to search to retrieve the weather data off of Weather.com.
