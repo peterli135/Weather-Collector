@@ -5,10 +5,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
+import re
 
 search_input = input('What location do you want search: ')
 
-#uses selenium in order to automate web browser to get url links.
+# uses selenium in order to automate web browser to get url links for request location.
 driver = webdriver.Chrome()
 driver.get('https://weather.com/')
 WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, 'LocationSearch_input')))
@@ -20,12 +21,15 @@ weather_click.click()
 current_weather_url = driver.current_url
 driver.quit()
 
-#requests instance for current weather
+# requests instance for current weather
 current_weather_html = requests.get(current_weather_url)
 soup_current = BeautifulSoup(current_weather_html.text, 'html.parser')
 
-#gets tenday weather url requests and instance for tenday weather
-tenday_weather_url = 'https://weather.com' + soup_current.find('a', attrs={'data-from-string': 'localsuiteNav_3_10 Day'}).get('href')
+# gets tenday weather url requests and instance for tenday weather
+def find_tenday(href): 
+    return href and re.compile("/en-CA/weather/tenday").search(href)
+
+tenday_weather_url = 'https://weather.com' + soup_current.find(href=find_tenday).get('href')
 tenday_weather_html = requests.get(tenday_weather_url)
 soup_tenday = BeautifulSoup(tenday_weather_html.text, 'html.parser')
 
@@ -36,7 +40,7 @@ days = []
 weather_list = []
 for items in weather_info:
     weather_dict = {}
-    day = items.find('h2').text
+    day = items.find('h3').text
     weather_dict['Temperature'] = items.find(class_='DetailsSummary--temperature--1Syw3').text
     weather_dict['Conditions'] = items.find(class_='DetailsSummary--extendedData--365A_').text
     weather_dict['Precipitation'] = items.find('span', attrs={'data-testid': 'PercentageValue'}).text
@@ -44,8 +48,12 @@ for items in weather_info:
     days.append(day)
     weather_list.append(weather_dict)
 
+# prints out the location that was requested
 location = soup_tenday.find('span', attrs={'class': 'LocationPageTitle--PresentationName--1QYny'}).text
 print("You requested weather data for the location:", location)
 
-df = pd.DataFrame(weather_list, index = days)
+df = pd.DataFrame(weather_list, index = days).rename_axis("Days")
+with pd.ExcelWriter('weather_10day_data.xlsx') as writer:  
+    df.to_excel(writer, sheet_name='x1')
+
 print(df)
